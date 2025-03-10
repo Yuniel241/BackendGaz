@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { logAction } = require("../middlewares/logMiddleware"); 
 
 //  Génération du token JWT
 const generateToken = (id) => {
@@ -49,6 +50,11 @@ const registerUser = async (req, res) => {
             role: newUser.role,
             token: generateToken(newUser.id),
         });
+    
+
+        // Après la création de l’utilisateur :
+        await logAction(req.user.id, "Ajout d'un nouvel utilisateur", "Utilisateur", newUser.id);
+        
 
     } catch (error) {
         res.status(500).json({ message: "Erreur serveur", error });

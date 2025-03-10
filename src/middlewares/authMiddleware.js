@@ -25,7 +25,14 @@ const isAdmin = (req, res, next) => { // Vérifier si l'utilisateur est administ
     }
 };
 
-module.exports = { protect, isAdmin };
+const restrictTo = (...roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ message: "Accès refusé : vous n'avez pas les permissions nécessaires." });
+        }
+        next();
+    };
+};
 
+module.exports = { protect, isAdmin, restrictTo };
 
-module.exports = { protect };
