@@ -1,11 +1,11 @@
 const express = require("express");
 const { registerUser, loginUser, getUserProfile } = require("../controllers/authController");
-const { protect } = require("../middlewares/authMiddleware");
+const { protect, isAdmin } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.post("/register", protect, isAdmin, registerUser); // Inscription
-router.post("/login", loginUser); // Connexion
-router.get("/profile", protect, getUserProfile); // Profil utilisateur (protégé)
+router.post("/register", registerUser); // 🔥 Supprimer `protect, isAdmin` pour permettre l'inscription du premier utilisateur
+router.post("/login", loginUser);
+router.get("/profile", protect, getUserProfile);
 
 module.exports = router;

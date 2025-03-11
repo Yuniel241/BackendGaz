@@ -17,6 +17,8 @@ app.get("/", (req, res) => {
     res.send("API de gestion de gaz en fonctionnement !");
 });
 
+
+
 // Routes
 const authRoutes = require("./routes/authRoutes"); // Importer les routes d'authentification
 
@@ -53,6 +55,11 @@ app.use("/api/notifications", notificationRoutes);
 const logRoutes = require("./routes/logRoutes"); // Importer les routes des log
 
 app.use("/api/logs", logRoutes);
+
+const swaggerUI = require("swagger-ui-express");
+const swaggerSpec = require("./docs/swaggerDocs");
+
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 
 
 
