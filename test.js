@@ -1,11 +1,22 @@
-require('dotenv').config(); // Charge le fichier .env
+require('dotenv').config();
+const connectDB = require('./src/config/db');
+const User = require('./src/models/User');
 
-const test = process.env.Mongo_URI;
-console.log(process.env.Mongo_URI); // Vérifier si l'URI est bien chargé
-/*
-{
-  "name": "Axel Yuniel",
-  "email": "axelyuniel@gmail.com",
-  "password": "password123"
+connectDB(); // Connexion à MongoDB
+
+function countDocuments() {
+    return User.countDocuments(); // Retourne une Promise
 }
-*/
+
+countDocuments()
+    .then(count => {
+        if (count > 0) {
+            console.log(`La collection contient ${count} documents.`);
+        } else {
+            console.log("La collection est vide.");
+        }
+    })
+    .catch(error => console.error("Erreur :", error));
+
+
+

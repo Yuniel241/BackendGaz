@@ -4,7 +4,7 @@ const { protect, isAdmin } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.post("/register", registerUser); // 🔥 Supprimer `protect, isAdmin` pour permettre l'inscription du premier utilisateur
+router.post("/register",  registerUser); // 🔒 Seul un admin peut créer des utilisateurs après le premier
 router.post("/login", loginUser);
 router.get("/profile", protect, getUserProfile);
 

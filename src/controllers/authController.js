@@ -13,8 +13,15 @@ const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
-        const userCount = await User.countDocuments(); // Vérifie s'il y a déjà un admin
-        const isAdmin = userCount === 0; // Le premier utilisateur est admin
+        const userCount = await User.countDocuments(); // Vérifie s'il y a déjà des utilisateurs
+        const isAdmin = userCount === 0; // 🔥 Le tout premier utilisateur est admin
+
+        // 🔥 Si ce n'est PAS le premier utilisateur, alors la requête doit être faite par un admin
+        if (userCount > 0) {
+            if (!req.user || req.user.role !== "admin") {
+                return res.status(403).json({ message: "Seul un administrateur peut créer un nouvel utilisateur." });
+            }
+        }
 
         const userExists = await User.findOne({ email });
         if (userExists) {
@@ -25,15 +32,14 @@ const registerUser = async (req, res) => {
             name,
             email,
             password,
-            role: isAdmin ? "admin" : "driver"
+            role: isAdmin ? "admin" : "driver" // 🔥 Premier utilisateur = admin, les suivants = chauffeur par défaut
         });
 
         await newUser.save();
 
-        // 🔥 Envoyer la réponse AVANT de loguer l'action pour éviter l'erreur
         res.status(201).json({ message: "Utilisateur créé avec succès", user: newUser });
 
-        // 🔥 Exécuter le log en arrière-plan pour éviter le conflit
+        // 🔥 Exécuter le log en arrière-plan
         if (req.user) {
             await logAction(req.user.id, "Ajout d'un nouvel utilisateur", "Utilisateur", newUser.id);
         }
@@ -43,6 +49,7 @@ const registerUser = async (req, res) => {
         }
     }
 };
+
 
 
 

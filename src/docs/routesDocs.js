@@ -26,8 +26,6 @@
  *     summary: Créer un utilisateur
  *     description: Le premier utilisateur enregistré devient automatiquement admin. Les suivants doivent être créés par un admin.
  *     tags: [Auth]
- *     security:
- *       - BearerAuth: []  #  Ajoute l'authentification JWT
  *     requestBody:
  *       required: true
  *       content:
