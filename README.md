@@ -1,6 +1,6 @@
 # 🔧 BackendGaz - API Node.js pour la gestion de gaz
 
-BackendGaz est une API RESTful développée en Node.js avec Express, conçue pour gérer les opérations de distribution de gaz : utilisateurs, commandes, livraisons, stocks, etc.
+BackendGaz est une API RESTful développée en Node.js avec Express, conçue pour gérer les opérations de distribution de gaz : utilisateurs, livraisons, stocks, etc.
 
 ---
 
@@ -11,7 +11,6 @@ BackendGaz est une API RESTful développée en Node.js avec Express, conçue pou
 - 📦 Gestion des stocks de gaz
 - 🧾 Création / modification / suppression de commandes
 - 🚚 Suivi des livraisons
-- 📊 Statistiques et reporting (à venir)
 
 ---
 
@@ -42,24 +41,114 @@ nodemon src/index.js
 node src/index.js
 
 # 🌐 L'API sera accessible à l'adresse :
-# http://localhost:3000
+# http://localhost:5000
 
-
+```
 ---
 
-## 📚 Documentation API avec Swagger
 
-La documentation complète de l’API est disponible via Swagger, pour faciliter la découverte et le test des endpoints.
 
-Pour y accéder, démarre le serveur puis ouvre cette URL dans ton navigateur :  
-`http://localhost:3000/api-docs`
+## 📚 Documentation API
 
-À quoi ça sert ?  
-- Visualiser tous les endpoints disponibles  
-- Consulter les schémas des requêtes et réponses  
-- Tester directement les appels API depuis l’interface  
-- Comprendre les paramètres, types de données et erreurs possibles  
 
-Swagger simplifie grandement l’intégration et le développement côté client ou mobile en fournissant une référence interactive toujours à jour.
+```bash
+Base URL: http://localhost:5000/api
+```
 
----
+
+## 🔐 Middleware liés à l'authentification
+
+| Middleware          | Description                          |
+|---------------------|--------------------------------------|
+| protect             | protect	Protège les routes. Vérifie et décode le token JWT. Autorise aussi l'inscription du tout premier utilisateur sans authentification.|
+| isAdmin             | Vérifie que l'utilisateur est un administrateur.    |
+| restrictTo(...roles)| Permet d’autoriser l’accès à certaines routes uniquement à certains rôles définis.         |
+	
+
+
+
+## 📌 POST /api/auth/register
+
+🔧 Description :
+Crée un nouvel utilisateur.
+Le premier utilisateur créé devient administrateur automatiquement. Ensuite, seuls les admins peuvent en créer d'autres.
+
+🛡️ Protection :
+Ouvert sans token si aucun utilisateur n'existe.
+Protégé par protect ensuite.
+
+📥 Corps de la requête :
+
+```json
+{
+  "name": "Nom Complet",
+  "email": "exemple@email.com",
+  "password": "MotDePasseFort123",
+  "role": "admin" // facultatif, sinon "driver" par défaut
+}
+```
+✅ Réponse :
+```json
+{
+  "message": "Utilisateur créé avec succès",
+  "user": {
+        "name": "Nom Complet",
+        "email": "exemple@email.com",
+        "password": "$2b$10$2H4qUmb0/I...",
+        "role": "admin",
+        "_id": "68449a7efaccd886e6d9379f",
+        "createdAt": "2025-06-07T20:01:02.631Z",
+        "updatedAt": "2025-06-07T20:01:02.631Z",
+  }
+}
+```
+🔴 Erreurs possibles :
+400 : Email déjà utilisé
+403 : Seuls les admins peuvent créer de nouveaux utilisateurs
+500 : Erreur serveur
+
+## 📌 POST /api/auth/login
+🔧 Description :
+Connexion utilisateur (sauf le rôle driver).
+
+📥 Corps de la requête :
+```json
+{
+  "email": "exemple@email.com",
+  "password": "MotDePasseFort123"
+}
+```
+✅ Réponse :
+```json
+{
+  "_id": "id_utilisateur",
+  "name": "Nom",
+  "email": "exemple@email.com",
+  "role": "admin",
+  "token": "jwt_token"
+}
+```
+🔴 Erreurs possibles :
+401 : Email ou mot de passe incorrect
+401 : Les chauffeurs ne peuvent pas se connecter
+
+## 📌 GET /api/auth/profile
+🔧 Description :
+Récupère les informations du profil de l’utilisateur actuellement connecté.
+
+🛡️ Protection :
+protect
+
+✅ Réponse :
+```json
+{
+  "_id": "id_utilisateur",
+  "name": "Nom",
+  "email": "email@email.com",
+  "role": "admin"
+}
+```
+🔴 Erreurs possibles :
+401 : Token absent, invalide ou expiré
+404 : Utilisateur non trouvé
+
