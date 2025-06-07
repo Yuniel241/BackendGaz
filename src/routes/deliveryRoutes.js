@@ -4,7 +4,7 @@ const { protect, restrictTo } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.post("/", protect, restrictTo("admin", "controller"), createDelivery);
-router.put("/:id", protect, restrictTo("controller"), updateDelivery);
+router.post("/", protect, restrictTo("controller"), createDelivery);
+router.patch("/:id", protect, restrictTo("controller"), updateDelivery);
 
 module.exports = router;

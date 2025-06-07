@@ -10,7 +10,7 @@ const generateToken = (id) => {
 
 //  Inscription
 const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password,role } = req.body;
 
     try {
         const userCount = await User.countDocuments(); // Vérifie s'il y a déjà des utilisateurs
@@ -27,19 +27,23 @@ const registerUser = async (req, res) => {
         if (userExists) {
             return res.status(400).json({ message: "Email déjà utilisé" });
         }
+        //si aucun rôle n'est défini lors de la requête on donne le rôle de driver
+        if (role == "") {
+            role= "driver"
+        }
 
         const newUser = new User({
             name,
             email,
             password,
-            role: isAdmin ? "admin" : "driver" // 🔥 Premier utilisateur = admin, les suivants = chauffeur par défaut
+            role: isAdmin ? "admin" : role //  Premier utilisateur = admin, les suivants = chauffeur par défaut
         });
 
         await newUser.save();
 
         res.status(201).json({ message: "Utilisateur créé avec succès", user: newUser });
 
-        // 🔥 Exécuter le log en arrière-plan
+        //  Exécuter le log en arrière-plan
         if (req.user) {
             await logAction(req.user.id, "Ajout d'un nouvel utilisateur", "Utilisateur", newUser.id);
         }
@@ -53,13 +57,13 @@ const registerUser = async (req, res) => {
 
 
 
-//  Connexion
+//  Connexion tous sauf les chauffeurs 
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
         const user = await User.findOne({ email });
-        if (user && (await bcrypt.compare(password, user.password))) {
+        if (user && (await bcrypt.compare(password, user.password)) && user.role != "driver") {
             res.json({
                 _id: user.id,
                 name: user.name,
@@ -68,7 +72,11 @@ const loginUser = async (req, res) => {
                 token: generateToken(user.id),
             });
         } else {
-            res.status(401).json({ message: "Email ou mot de passe incorrect" });
+            if (user.role == "driver") {
+                res.status(401).json({ message: "Les chauffeurs n'ont pas accèss à la plateforme pour l'instant" });
+            } else {
+                res.status(401).json({ message: "Email ou mot de passe incorrect" });
+            }
         }
     } catch (error) {
         res.status(500).json({ message: "Erreur serveur", error });

@@ -609,7 +609,7 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Stock'
+ *             $ref: '#/components/schemas/StockMovement'
  *     responses:
  *       200:
  *         description: Stock mis à jour

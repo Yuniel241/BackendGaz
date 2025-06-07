@@ -20,7 +20,7 @@ const StockMovementSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true
+        required: false
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
